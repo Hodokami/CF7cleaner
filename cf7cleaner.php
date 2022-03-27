@@ -18,7 +18,7 @@ function enable_cf7_jscss()
 	$nowslug = $post->post_name;
 	$cf7cslag = cf7c_get();
 	$is_cf7page = in_array($nowslug, $cf7cslag);
-	if (false === $is_cf7page)
+	if (true === $is_cf7page)
 	{
 		if (function_exists('wpcf7_enqueue_scripts'))
 		{
