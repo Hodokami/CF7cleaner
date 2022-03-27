@@ -6,7 +6,30 @@
 */
 if ( ! defined( 'ABSPATH' ) ) exit; // This php needs load wp-config.php
 
+add_filter( 'wpcf7_load_js', '__return_false' ); // JS dont load
+add_filter( 'wpcf7_load_css', '__return_false' ); // CSS dont load
+
 $cf7cslag = cf7c_get();
+
+add_action( 'wp_enqueue_scripts', 'enable_cf7_jscss' );
+function enable_cf7_jscss()
+{
+	global $post;
+	$nowslug = $post->post_name;
+	$cf7cslag = cf7c_get();
+	$is_cf7page = in_array($nowslug, $cf7cslag);
+	if (false === $is_cf7page)
+	{
+		if (function_exists('wpcf7_enqueue_scripts'))
+		{
+			wpcf7_enqueue_scripts();
+		}
+		if (function_exists('wpcf7_enqueue_styles'))
+		{
+			wpcf7_enqueue_styles();
+		}
+	}
+}
 
 if(false === $cf7cslag)//check option existence
 {
