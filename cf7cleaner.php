@@ -1,16 +1,16 @@
 <?php
 /*
-	Plugin Name:		CF7 JS&CSS Cleaner
-	Plugin URI:			https://github.com/Hodokami/CF7cleaner
-	Description:		Clean JS&CSS of "Contact Form 7" on Pages other than Form page. THIS PLUGIN CANNOT ACTIVATE WHEN "Contact Form 7" IS DISABLED!
-	Version:			0.4
-	Requires at least:	5.9
-	Requirres PHP:		8.0
-	Author:				Hodokami
-	Author URI:			https://tellaresdo.com/
-	Licence:			GPL v3 or later
-	Licence URI:		https://www.gnu.org/licenses/gpl-3.0.html
-	Update URI:			https://github.com/Hodokami/
+	Plugin Name:       CF7 JS&CSS Cleaner
+	Plugin URI:        https://github.com/Hodokami/CF7cleaner
+	Description:       Clean JS&CSS of "Contact Form 7" on Pages other than Form page. THIS PLUGIN CANNOT ACTIVATE WHEN "Contact Form 7" IS DISABLED!
+	Version:           0.4
+	Requires at least: 5.9
+	Requirres PHP:     8.0
+	Author:            Hodokami
+	Author URI:        https://tellaresdo.com/
+	Licence:           GPL v3 or later
+	Licence URI:       https://www.gnu.org/licenses/gpl-3.0.html
+	Update URI:        https://github.com/Hodokami/
 */
 if (!defined('ABSPATH')) exit; // This php needs load wp-config.php
 
