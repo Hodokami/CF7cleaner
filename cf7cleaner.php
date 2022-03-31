@@ -3,7 +3,7 @@
 	Plugin Name:		CF7 JS&CSS Cleaner
 	Plugin URI:			https://github.com/Hodokami/CF7cleaner
 	Description:		Clean JS&CSS of "Contact Form 7" on Pages other than Form page. THIS PLUGIN CANNOT ACTIVATE WHEN "Contact Form 7" IS DISABLED!
-	Version:			0.3
+	Version:			0.4
 	Requires at least:	5.9
 	Requirres PHP:		8.0
 	Author:				Hodokami
@@ -12,10 +12,9 @@
 	Licence URI:		https://www.gnu.org/licenses/gpl-3.0.html
 	Update URI:			https://github.com/Hodokami/
 */
-if ( ! defined( 'ABSPATH' ) ) exit; // This php needs load wp-config.php
+if (!defined('ABSPATH')) exit; // This php needs load wp-config.php
 
-add_action( 'wp_enqueue_scripts', 'enable_cf7_jscss' );
-
+add_action('wp_enqueue_scripts', 'enable_cf7_jscss', 21);
 function enable_cf7_jscss()
 {
 	add_filter( 'wpcf7_load_js', '__return_false' ); // JS dont load
@@ -27,7 +26,9 @@ function enable_cf7_jscss()
 	{
 		if (function_exists('wpcf7_enqueue_scripts')) wpcf7_enqueue_scripts();
 		if (function_exists('wpcf7_enqueue_styles')) wpcf7_enqueue_styles();
+		wp_enqueue_style('reCAPTCHA_masker', plugins_url('reCAPTCHA_masker.css', __FILE__)); //load masker
 	}
+	else wp_deregister_script('google-recaptcha'); // unload reCAPTCHA v3 from page (needs priority > 20, dont move on default priority)
 }
 
 function cf7c_get() // Option get
