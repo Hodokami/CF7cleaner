@@ -1,8 +1,16 @@
 <?php
 /*
-	Plugin Name: CF7 JS&CSS Cleaner
-	Description: Clean JS&CSS of "Contact Form 7" on Pages other than Form page. THIS PLUGIN CANNOT ACTIVATE WHEN "Contact Form 7" IS DISABLED!
-	Version: 0.2
+	Plugin Name:		CF7 JS&CSS Cleaner
+	Plugin URI:			https://github.com/Hodokami/CF7cleaner
+	Description:		Clean JS&CSS of "Contact Form 7" on Pages other than Form page. THIS PLUGIN CANNOT ACTIVATE WHEN "Contact Form 7" IS DISABLED!
+	Version:			0.3
+	Requires at least:	5.9
+	Requirres PHP:		8.0
+	Author:				Hodokami
+	Author URI:			https://tellaresdo.com/
+	Licence:			GPL v3 or later
+	Licence URI:		https://www.gnu.org/licenses/gpl-3.0.html
+	Update URI:			https://github.com/Hodokami/
 */
 if ( ! defined( 'ABSPATH' ) ) exit; // This php needs load wp-config.php
 
@@ -12,10 +20,9 @@ function enable_cf7_jscss()
 {
 	add_filter( 'wpcf7_load_js', '__return_false' ); // JS dont load
 	add_filter( 'wpcf7_load_css', '__return_false' ); // CSS dont load
-	global $post;
-	$nowslug = $post->post_name;
-	$cf7cslug = cf7c_get();
-	$is_cf7page = in_array($nowslug, $cf7cslug);
+	$nowID = get_the_ID();
+	$cf7cID = cf7c_get();
+	$is_cf7page = in_array($nowID, $cf7cID);
 	if (true === $is_cf7page)
 	{
 		if (function_exists('wpcf7_enqueue_scripts')) wpcf7_enqueue_scripts();
@@ -23,19 +30,13 @@ function enable_cf7_jscss()
 	}
 }
 
-$cf7cslug = cf7c_get();
-if(false === $cf7cslug) //check option existence
+function cf7c_get() // Option get
 {
-	$init_cf7c = array();
-	cf7c_set($init_cf7c);
+	return get_option('tellaresdo_cf7c_ID');
 }
-function cf7c_get()
+function cf7c_set($cf7cID) // Option set
 {
-	return get_option('tellaresdo_cf7c_slug');
-}
-function cf7c_set($cf7cslug)
-{
-	update_option ('tellaresdo_cf7c_slug', $cf7cslug, 'no');
+	update_option ('tellaresdo_cf7c_ID', $cf7cID, 'no');
 }
 
 add_filter('pre_update_option_active_plugins', 'cleaner_load_before_cf7', 10, 2); // plugin enabled/disabled hook for 'cleaner_load_before_cf7'
@@ -78,31 +79,24 @@ function cleaner_load_before_cf7($active_plugins, $old_value)
 	$active_plugins = array_values($active_plugins); // reset array key
 	return $active_plugins;
 }
-
-add_filter('wp_insert_post_data', 'cf7cleaner_checker', 10, 1);
-function cf7cleaner_checker($data) // set Option value
+add_action('save_post', 'cf7cleaner_checker', 10, 1); //action works when update posts
+function cf7cleaner_checker($post_ID) // set Option value
 {
-	$cf7cslug = cf7c_get();
-	$post_slug = $data['post_name'];
-	$cf7c_optscan = in_array($post_slug, $cf7cslug);
-	$cf7_match = preg_match('/\[contact-form-7 id=(.+?) title=(.+?)\]/', $data['post_content']);
-	if (1 === $cf7_match && false === $cf7c_optscan)
-	{
-		$cf7cslug[] = $post_slug;
-		cf7c_set($cf7cslug);
-	}
-	if (0 === $cf7_match && false !== $cf7c_optscan)
-	{
-		foreach ($cf7cslug as $no=>$slug)
-		{
-			if ($slug == $post_slug) // REMOVER
-				{
-					unset($cf7cslug[$no]);
-					$cf7cslug = array_values($cf7cslug);
-					cf7c_set($cf7cslug);
-				}
-		
-		}
-	}
-	return $data;
+	$cf7csetting_ID = wp_is_post_revision($post_ID); // revision check
+	if(false === $cf7csetting_ID) $cf7csetting_ID = $post_ID; // not revision
+
+	$cf7cID = cf7c_get(); //get now option array
+	$init_cf7c = array(); // option init value(empty array)
+	if(false === $cf7cID) cf7c_set($init_cf7c); //check option existence
+	$cf7c_optscan = in_array($cf7csetting_ID, $cf7cID); // search option array
+
+	// $cf7csetting_post = get_post($cf7csetting_ID);
+	// $cf7cmatching_content = apply_filters('the_content', $cf7csetting_post->post_content);
+	$cf7cmatching_content = get_post($cf7csetting_ID)->post_content;
+
+	$cf7_match = preg_match('/\[contact-form-7 id=(.+?) title=(.+?)\]/', $cf7cmatching_content); // match CF7 from post
+	if (1 === $cf7_match && false === $cf7c_optscan) $cf7cID[] = $cf7csetting_ID; // add option value
+	if (0 === $cf7_match && false !== $cf7c_optscan) foreach ($cf7cID as $no=>$ID) if ($ID == $cf7csetting_ID) unset($cf7cID[$no]); //remove option
+	$cf7cID = array_values($cf7cID);
+	cf7c_set($cf7cID);
 }
