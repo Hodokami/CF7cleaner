@@ -14,8 +14,8 @@ function enable_cf7_jscss()
 	add_filter( 'wpcf7_load_css', '__return_false' ); // CSS dont load
 	global $post;
 	$nowslug = $post->post_name;
-	$cf7cslag = cf7c_get();
-	$is_cf7page = in_array($nowslug, $cf7cslag);
+	$cf7cslug = cf7c_get();
+	$is_cf7page = in_array($nowslug, $cf7cslug);
 	if (true === $is_cf7page)
 	{
 		if (function_exists('wpcf7_enqueue_scripts')) wpcf7_enqueue_scripts();
@@ -23,19 +23,19 @@ function enable_cf7_jscss()
 	}
 }
 
-$cf7cslag = cf7c_get();
-if(false === $cf7cslag) //check option existence
+$cf7cslug = cf7c_get();
+if(false === $cf7cslug) //check option existence
 {
 	$init_cf7c = array();
 	cf7c_set($init_cf7c);
 }
 function cf7c_get()
 {
-	return get_option('tellaresdo_cf7c_slag');
+	return get_option('tellaresdo_cf7c_slug');
 }
-function cf7c_set($cf7cslag)
+function cf7c_set($cf7cslug)
 {
-	update_option ('tellaresdo_cf7c_slag', $cf7cslag, 'no');
+	update_option ('tellaresdo_cf7c_slug', $cf7cslug, 'no');
 }
 
 add_filter('pre_update_option_active_plugins', 'cleaner_load_before_cf7', 10, 2); // plugin enabled/disabled hook for 'cleaner_load_before_cf7'
@@ -82,24 +82,24 @@ function cleaner_load_before_cf7($active_plugins, $old_value)
 add_filter('wp_insert_post_data', 'cf7cleaner_checker', 10, 1);
 function cf7cleaner_checker($data) // set Option value
 {
-	$cf7cslag = cf7c_get();
-	$post_slag = $data['post_name'];
-	$cf7c_optscan = in_array($post_slag, $cf7cslag);
+	$cf7cslug = cf7c_get();
+	$post_slug = $data['post_name'];
+	$cf7c_optscan = in_array($post_slug, $cf7cslug);
 	$cf7_match = preg_match('/\[contact-form-7 id=(.+?) title=(.+?)\]/', $data['post_content']);
 	if (1 === $cf7_match && false === $cf7c_optscan)
 	{
-		$cf7cslag[] = $post_slag;
-		cf7c_set($cf7cslag);
+		$cf7cslug[] = $post_slug;
+		cf7c_set($cf7cslug);
 	}
 	if (0 === $cf7_match && false !== $cf7c_optscan)
 	{
-		foreach ($cf7cslag as $no=>$slag)
+		foreach ($cf7cslug as $no=>$slug)
 		{
-			if ($slag == $post_slag) // REMOVER
+			if ($slug == $post_slug) // REMOVER
 				{
-					unset($cf7cslag[$no]);
-					$cf7cslag = array_values($cf7cslag);
-					cf7c_set($cf7cslag);
+					unset($cf7cslug[$no]);
+					$cf7cslug = array_values($cf7cslug);
+					cf7c_set($cf7cslug);
 				}
 		
 		}
