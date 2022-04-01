@@ -3,7 +3,7 @@
 	Plugin Name:       CF7 JS&CSS Cleaner
 	Plugin URI:        https://github.com/Hodokami/CF7cleaner
 	Description:       Clean JS&CSS of "Contact Form 7" on Pages other than Form page. THIS PLUGIN CANNOT ACTIVATE WHEN "Contact Form 7" IS DISABLED!
-	Version:           0.4
+	Version:           0.5
 	Requires at least: 5.9
 	Requirres PHP:     8.0
 	Author:            Hodokami
@@ -27,8 +27,15 @@ function enable_cf7_jscss()
 		if (function_exists('wpcf7_enqueue_scripts')) wpcf7_enqueue_scripts();
 		if (function_exists('wpcf7_enqueue_styles')) wpcf7_enqueue_styles();
 		wp_enqueue_style('reCAPTCHA_masker', plugins_url('reCAPTCHA_masker.css', __FILE__)); //load masker
+		add_filter('the_content', 'add_PPToS_tags', 10, 1); // add reCAPTCHA Privacy Policy & Terms of Service links
 	}
 	else wp_deregister_script('google-recaptcha'); // unload reCAPTCHA v3 from page (needs priority > 20, dont move on default priority)
+}
+function add_PPToS_tags($content)
+{
+	return $content . 'This site is protected by reCAPTCHA and the Google
+    <a href="https://policies.google.com/privacy">Privacy Policy</a> and
+    <a href="https://policies.google.com/terms">Terms of Service</a> apply.';
 }
 
 function cf7c_get() // Option get
@@ -59,6 +66,7 @@ function cleaner_load_before_cf7($active_plugins, $old_value)
 				unset($active_plugins[$no]);
 				$active_plugins = array_values($active_plugins);
 				$cf7cremoved = 1;
+				break;
 				/*
 					"$cf7cremoved == 1" expresses that cf7cleaner is enabled.
 					"$cf7cremoved == 0" expresses that cf7cleaner is disabled. 'cleaner_load_before_cf7' will do nothing.
@@ -66,7 +74,8 @@ function cleaner_load_before_cf7($active_plugins, $old_value)
 			}
 	
 	}
-	if ($cf7cremoved == 1) // cf7cleaner is enabled, but removed by REMOVER. ($cf7cremoved == 1) Sets cf7cleaner before CF7 AGAIN.
+	unset($no);
+	if ($cf7cremoved == 1) // cf7cleaner is enabled, but removed by REMOVER. Sets cf7cleaner before CF7 AGAIN.
 	{
 		foreach ($active_plugins as $no=>$path) // SET
 		{
@@ -90,9 +99,6 @@ function cf7cleaner_checker($post_ID) // set Option value
 	$init_cf7c = array(); // option init value(empty array)
 	if(false === $cf7cID) cf7c_set($init_cf7c); //check option existence
 	$cf7c_optscan = in_array($cf7csetting_ID, $cf7cID); // search option array
-
-	// $cf7csetting_post = get_post($cf7csetting_ID);
-	// $cf7cmatching_content = apply_filters('the_content', $cf7csetting_post->post_content);
 	$cf7cmatching_content = get_post($cf7csetting_ID)->post_content;
 
 	$cf7_match = preg_match('/\[contact-form-7 id=(.+?) title=(.+?)\]/', $cf7cmatching_content); // match CF7 from post
